@@ -11,19 +11,42 @@ generator client {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  username      String    @unique
-  email         String    @unique
+  id            Int             @id @default(autoincrement())
+  username      String          @unique
+  email         String          @unique
   created_at    DateTime
   updated_at    DateTime
   password_hash String
-  Message       Message[]
+  message       Message[]
+  userInChannel UserInChannel[]
+  channel       Channel[]
 }
 
 model Message {
   id         Int      @id @default(autoincrement())
   created_at DateTime
   updated_at DateTime
+  content    String
+  channel    Channel  @relation(fields: [channel_id], references: [id])
+  channel_id Int
   author_id  Int
   author     User     @relation(fields: [author_id], references: [id])
+}
+
+model UserInChannel {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id])
+  channelId Int
+  channel   Channel @relation(fields: [channelId], references: [id])
+}
+
+model Channel {
+  id            Int             @id @default(autoincrement())
+  owner_id      Int
+  owner         User            @relation(fields: [owner_id], references: [id])
+  created_at    DateTime
+  updated_at    DateTime
+  userInChannel UserInChannel[]
+  message       Message[]
 }
