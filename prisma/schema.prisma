@@ -3,7 +3,7 @@
 
 datasource db {
   provider = "postgresql"
-  url      = env("psql postgresql://pielov:1234@localhost:6432/chat_api")
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -12,41 +12,43 @@ generator client {
 
 model User {
   id            Int             @id @default(autoincrement())
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
   username      String          @unique
   email         String          @unique
-  created_at    DateTime
-  updated_at    DateTime
   password_hash String
   message       Message[]
-  userInChannel UserInChannel[]
-  channel       Channel[]
+  inChannel     UserInChannel[]
+  channel       Channel[]       @relation("Owner")
 }
 
 model Message {
   id         Int      @id @default(autoincrement())
-  created_at DateTime
-  updated_at DateTime
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
   content    String
-  channel    Channel  @relation(fields: [channel_id], references: [id])
-  channel_id Int
-  author_id  Int
-  author     User     @relation(fields: [author_id], references: [id])
+  channel    Channel  @relation(fields: [channelId], references: [id])
+  channelId  Int
+  authorId   Int?
+  author     User?    @relation(fields: [authorId], references: [id])
 }
 
 model UserInChannel {
-  id        Int     @id @default(autoincrement())
   userId    Int
   user      User    @relation(fields: [userId], references: [id])
   channelId Int
   channel   Channel @relation(fields: [channelId], references: [id])
+
+  @@id([userId, channelId])
 }
 
 model Channel {
   id            Int             @id @default(autoincrement())
-  owner_id      Int
-  owner         User            @relation(fields: [owner_id], references: [id])
-  created_at    DateTime
-  updated_at    DateTime
-  userInChannel UserInChannel[]
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
+  name          String
+  ownerId       Int
+  owner         User            @relation("Owner", fields: [ownerId], references: [id])
   message       Message[]
+  userInChannel UserInChannel[]
 }
