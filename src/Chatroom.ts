@@ -12,7 +12,8 @@ export default class Chatroom {
   }
 
   broadcastMessage(message: string) {
-    this.members.forEach(member => member.emit("message", message))
+    console.log("message: ", message)
+    // this.members.forEach(member => member.emit("message", message))
   }
 
   addEntry(message: string) {

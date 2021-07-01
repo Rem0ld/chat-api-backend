@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 
 
-export interface Client extends Socket {
+export interface Client {
   id: string;
   name: string;
   email: string;

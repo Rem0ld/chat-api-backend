@@ -1,14 +1,19 @@
 import express from "express";
 import { Socket } from "socket.io";
 import { ChatroomManagerType, ChatroomType, Client } from "./types";
-
+import cors from "cors";
 
 const app = express();
 const port = process.env.PORT || 3000;
 app.set("port", port);
 const http = require("http").Server(app);
 // Binding socket.io to http server
-const io = require("socket.io")(http);
+const io = require("socket.io")(http, {
+  cors: {
+    origin: "http://127.0.0.1:3001",
+    methods: ["GET", "POST"]
+  }
+});
 const ClientManager = require("./ClientManager");
 const ChatroomManager = require("./chatroomManager");
 const makeHandlers = require("./handlers");
@@ -16,60 +21,62 @@ const makeHandlers = require("./handlers");
 const clientManager = ClientManager();
 const chatroomManager = ChatroomManager();
 
-app.get("/", (req: any, res: any) => {
-  res.send("hello world");
-});
-const client: Client = {
-  id: "1192387",
-  name: "Pierre",
-  email: "p.lovergne@hotmail.fr",
-  lastConnection: Date.now()
-}
-const {
-  handleJoin,
-  handleLeave,
-  handleMessage,
-  handleGetChatrooms,
-  handleDisconnect
-} = makeHandlers(client, clientManager, chatroomManager)
+// app.get("/", (req: any, res: any) => {
+//   res.send("hello world");
+// });
 
-clientManager.addClient(client)
-console.log(clientManager.getAllClients())
+io.on('connection', function (socket: Socket) {
+  const {
+    handleRegister,
+    handleJoin,
+    handleLeave,
+    handleMessage,
+    handleGetChatrooms,
+    handleDisconnect
+  } = makeHandlers(socket, clientManager, chatroomManager)
 
-chatroomManager.addChatroom("salon1")
-console.log(chatroomManager.serializeChatrooms());
-const salon: ChatroomType = chatroomManager.getChatroomByName("salon1");
-salon.addMember(client)
-salon.addEntry("test")
-console.log(salon.serialize())
-// console.log(salon.getChatHistory())
-// console.log(chatroomManager.serializeChatrooms())
+  console.log("connected : ", socket.id)
 
+  socket.on('register', handleRegister)
 
+  socket.on('join', handleJoin)
 
-// io.on('connection', function (client: Socket) {
-//   client.on('register', handleRegister)
+  socket.on('leave', handleLeave)
 
-//   client.on('join', handleJoin)
+  socket.on('message', handleMessage)
 
-//   client.on('leave', handleLeave)
+  socket.on('chatrooms', handleGetChatrooms)
 
-//   client.on('message', handleMessage)
+  // socket.on('availableUsers', handleGetAvailableUsers)
 
-//   client.on('chatrooms', handleGetChatrooms)
+  socket.on('disconnect', function () {
+    console.log('socket disconnect...', socket.id)
+    handleDisconnect()
+  })
 
-//   // client.on('availableUsers', handleGetAvailableUsers)
+  socket.on('error', function (err) {
+    console.log('received error from socket:', socket.id)
+    console.log(err)
+  })
+})
 
-//   client.on('disconnect', function () {
-//     console.log('client disconnect...', client.id)
-//     handleDisconnect()
-//   })
+// const client: Client = {
+//   id: "1192387",
+//   name: "Pierre",
+//   email: "p.lovergne@hotmail.fr",
+//   lastConnection: Date.now()
+// }
+// clientManager.addClient(client)
+// console.log(clientManager.getAllClients())
 
-//   client.on('error', function (err) {
-//     console.log('received error from client:', client.id)
-//     console.log(err)
-//   })
-// })
+// chatroomManager.addChatroom("salon1")
+// // console.log(chatroomManager.serializeChatrooms());
+// const salon: ChatroomType = chatroomManager.getChatroomByName("salon1");
+// salon.addMember(client)
+// salon.addEntry("test")
+// handleMessage({ chatroomName: "salon1", message: "je suis message" })
+// salon.getChatHistory();
+// // console.log(salon.getChatHistory())
 
 const server = http.listen(port, function () {
   console.log(`Listening on localhost:${port}`);

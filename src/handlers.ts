@@ -49,6 +49,16 @@ function makeHandleEvent(client: Client, clientManager: ClientManagerType, chatr
 module.exports = function (client: Client, clientManager: ClientManagerType, chatroomManager: ChatroomManagerType) {
   const handleEvent = makeHandleEvent(client, clientManager, chatroomManager);
 
+  function handleRegister(socketId: string, callback: any) {
+    const testing: Client = {
+      id: socketId,
+      name: "Pierre",
+      email: "p.lovergne@",
+      lastConnection: Date.now()
+    }
+    const user = clientManager.addClient(testing)
+    return callback(null, user)
+  }
 
   function handleJoin(chatroomName: string, callback: any) {
     const createEntry = () => ({ event: `joined ${chatroomName}` })
@@ -95,6 +105,7 @@ module.exports = function (client: Client, clientManager: ClientManagerType, cha
   }
 
   return {
+    handleRegister,
     handleJoin,
     handleLeave,
     handleMessage,
