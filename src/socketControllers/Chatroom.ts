@@ -1,4 +1,4 @@
-import { ChatroomType, Client } from "./types";
+import { ChatroomType, Client } from "../types";
 
 export default class Chatroom {
   name: any;
