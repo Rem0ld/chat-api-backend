@@ -1,36 +1,29 @@
 import express from "express";
 import { Socket } from "socket.io";
-import { ChatroomManagerType, ChatroomType, Client, ClientManagerType } from "./types";
-import { buildSchema } from "graphql";
-const { ApolloServer, gql } = require('apollo-server-express');
+import {
+  ChatroomManagerType,
+  ClientManagerType,
+} from "./types";
+import { Context, createContext } from "./config/context";
+const { ApolloServer, gql } = require("apollo-server-express");
+import { typeDefs } from "./graphql/schemas/Schema";
+import { permissions } from "./config/permissions";
+import { resolvers } from "./graphql/resolvers";
 
 const app = express();
 const port = process.env.PORT || 3000;
 app.set("port", port);
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-const typeDefs = gql(`
-type Query {
-  hello: String
-}`)
-
-const resolvers = {
-  Query: {
-    hello: () => {
-      return "Hello World!";
-    }
-  }
-}
-const server = new ApolloServer({ typeDefs, resolvers });
+// Make and Attach ApolloServer to the App
+const server = new ApolloServer({
+  typeDefs,
+  resolvers: resolvers,
+  permissions: [permissions],
+  context: createContext,
+});
 server.applyMiddleware({ app });
-
-const ClientManager = require("./socketControllers/ClientManager");
-const ChatroomManager = require("./socketControllers/chatroomManager");
-const makeHandlers = require("./socketControllers/handlers");
-
-const clientManager: ClientManagerType = ClientManager();
-const chatroomManager: ChatroomManagerType = ChatroomManager();
 
 
 // const client: Client = {
@@ -52,47 +45,57 @@ const chatroomManager: ChatroomManagerType = ChatroomManager();
 // // console.log(salon.getChatHistory())
 
 const http = app.listen(port, function () {
-  console.log(`Listening on localhost:${port}`)
+  console.log(`Listening on localhost:${port}`);
   console.log(`GraphQL API server at http://localhost:${port}/graphql`);
 });
+
+// Attach socket.io to the App
 const io = require("socket.io")(http, {
   cors: {
     origin: "http://127.0.0.1:3001",
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+  },
 });
 
-io.on('connection', function (socket: Socket) {
+// Import everything for websockets
+const ClientManager = require("./socketControllers/ClientManager");
+const ChatroomManager = require("./socketControllers/chatroomManager");
+const makeHandlers = require("./socketControllers/handlers");
+
+const clientManager: ClientManagerType = ClientManager();
+const chatroomManager: ChatroomManagerType = ChatroomManager();
+
+io.on("connection", function (socket: Socket) {
   const {
     handleRegister,
     handleJoin,
     handleLeave,
     handleMessage,
     handleGetChatrooms,
-    handleDisconnect
-  } = makeHandlers(socket, clientManager, chatroomManager)
+    handleDisconnect,
+  } = makeHandlers(socket, clientManager, chatroomManager);
 
-  console.log("connected : ", socket.id)
+  console.log("connected : ", socket.id);
 
-  socket.on('register', handleRegister)
+  socket.on("register", handleRegister);
 
-  socket.on('join', handleJoin)
+  socket.on("join", handleJoin);
 
-  socket.on('leave', handleLeave)
+  socket.on("leave", handleLeave);
 
-  socket.on('message', handleMessage)
+  socket.on("message", handleMessage);
 
-  socket.on('chatrooms', handleGetChatrooms)
+  socket.on("chatrooms", handleGetChatrooms);
 
   // socket.on('availableUsers', handleGetAvailableUsers)
 
-  socket.on('disconnect', function () {
-    console.log('socket disconnect...', socket.id)
-    handleDisconnect()
-  })
+  socket.on("disconnect", function () {
+    console.log("socket disconnect...", socket.id);
+    handleDisconnect();
+  });
 
-  socket.on('error', function (err) {
-    console.log('received error from socket:', socket.id)
-    console.log(err)
-  })
-})
+  socket.on("error", function (err) {
+    console.log("received error from socket:", socket.id);
+    console.log(err);
+  });
+});
