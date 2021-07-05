@@ -1,25 +1,25 @@
+import { Socket } from "socket.io";
 import { ChatroomType, Client } from "../types";
 
 export default class Chatroom {
   name: string;
   owner: string;
   dateCreation: string;
-  members: Map<string, any>;
+  members: Map<string, { client: Socket, user: Client }>;
   chatHistory: string[];
 
-  constructor(name: string, user: Client) {
+  constructor(name: string, client: Socket, user: Client) {
     this.name = name;
     this.owner = user.id;
     this.members = new Map();
     this.chatHistory = [];
     this.dateCreation = new Date().toISOString().split('T')[0];;
-    this.addMember(user);
+    this.addMember(client, user);
   }
 
   broadcastMessage(message: string) {
-    // console.log("message: ", message)
-    console.log(this.members)
-    this.members.forEach(member => member.emit("message", message))
+    console.log("this is the message\n *******************", message)
+    this.members.forEach(member => member.client.emit("message", message))
   }
 
   addEntry(message: string) {
@@ -30,8 +30,8 @@ export default class Chatroom {
     return this.chatHistory.slice();
   }
 
-  addMember(user: Client) {
-    this.members.set(user.id, user)
+  addMember(client: Socket, user: Client) {
+    this.members.set(client.id, { client, user })
   }
 
   removeMember(member: any) {

@@ -1,14 +1,21 @@
+import { Socket } from "socket.io";
 import { ClientManagerType, Client } from "../types";
 
 
-module.exports = function (): ClientManagerType {
-  const clients = new Map<string, Client>();
 
-  function addClient(client: Client) {
-    clients.set(client.id, client);
+
+module.exports = function (): ClientManagerType {
+  const clients = new Map<string, { client: Socket, user: Client | undefined }>();
+
+  function registerClient(client: Socket, user: Client) {
+    clients.set(client.id, { client, user })
   }
 
-  function removeClient(client: Client) {
+  function addClient(client: Socket) {
+    clients.set(client.id, { client, user: undefined });
+  }
+
+  function removeClient(client: Socket) {
     clients.delete(client.id);
   }
 
@@ -25,5 +32,6 @@ module.exports = function (): ClientManagerType {
     removeClient,
     getUserByClientId,
     getAllClients,
+    registerClient,
   };
 };

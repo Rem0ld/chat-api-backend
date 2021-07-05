@@ -83,6 +83,7 @@ io.on("connection", function (socket: Socket) {
   // console.log("connected : ", socket.id);
 
   // console.log("Users", clientManager.getAllClients())
+  clientManager.addClient(socket)
 
   socket.on("register", handleRegister);
 
