@@ -1,19 +1,25 @@
 import { ChatroomType, Client } from "../types";
 
 export default class Chatroom {
-  name: any;
-  members: Map<string, Client>;
+  name: string;
+  owner: string;
+  dateCreation: string;
+  members: Map<string, any>;
   chatHistory: string[];
 
-  constructor(name: string) {
+  constructor(name: string, user: Client) {
     this.name = name;
+    this.owner = user.id;
     this.members = new Map();
     this.chatHistory = [];
+    this.dateCreation = new Date().toISOString().split('T')[0];;
+    this.addMember(user);
   }
 
   broadcastMessage(message: string) {
-    console.log("message: ", message)
-    // this.members.forEach(member => member.emit("message", message))
+    // console.log("message: ", message)
+    console.log(this.members)
+    this.members.forEach(member => member.emit("message", message))
   }
 
   addEntry(message: string) {
@@ -35,6 +41,7 @@ export default class Chatroom {
   serialize() {
     return {
       name: this.name,
+      owner: this.owner,
       size: this.members.size
     };
   }

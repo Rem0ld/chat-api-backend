@@ -1,5 +1,5 @@
+import { ChatroomManagerType, Client, ClientManagerType } from "../types"
 import Chatroom from "./chatroom"
-import { ChatroomManagerType, ChatroomType, Client, ClientManagerType } from "./types"
 
 function makeHandleEvent(client: Client, clientManager: ClientManagerType, chatroomManager: ChatroomManagerType) {
 
@@ -25,6 +25,7 @@ function makeHandleEvent(client: Client, clientManager: ClientManagerType, chatr
   }
 
   async function ensureUserSelectedAndChatroomValid(chatroomName: string) {
+    console.log("ensure user is selected", client.id)
     const [user, chatroom] = await Promise.all([
       ensureUserSelected(client.id),
       ensureValidChatroom(chatroomName)
@@ -46,18 +47,15 @@ function makeHandleEvent(client: Client, clientManager: ClientManagerType, chatr
   return handleEvent;
 
 }
-module.exports = function (client: Client, clientManager: ClientManagerType, chatroomManager: ChatroomManagerType) {
+module.exports = function (client: any, clientManager: ClientManagerType, chatroomManager: ChatroomManagerType) {
   const handleEvent = makeHandleEvent(client, clientManager, chatroomManager);
 
-  function handleRegister(socketId: string, callback: any) {
-    const testing: Client = {
-      id: socketId,
-      name: "Pierre",
-      email: "p.lovergne@",
-      lastConnection: Date.now()
-    }
-    const user = clientManager.addClient(testing)
-    return callback(null, user)
+  function handleRegister(connection: any, callback: any) {
+    const now = Date.now()
+    // connection.lastConnection = now;
+    // client = connection;
+    clientManager.addClient(client)
+    return callback(null, connection)
   }
 
   function handleJoin(chatroomName: string, callback: any) {
@@ -66,7 +64,13 @@ module.exports = function (client: Client, clientManager: ClientManagerType, cha
     handleEvent(chatroomName, createEntry)
       .then((chatroom) => {
         if (typeof chatroom !== "string") {
-          chatroom.addMember(client)
+
+          const members = Array.from(chatroom.members.values())
+          const member = members.some(element => element.id === client.id)
+
+          if (!member) {
+            chatroom.addMember(client)
+          }
           callback(null, chatroom.getChatHistory())
         }
       })
@@ -85,16 +89,21 @@ module.exports = function (client: Client, clientManager: ClientManagerType, cha
       })
       .catch(callback)
   }
+
   function handleMessage({ chatroomName, message }: { chatroomName: string, message: string }, callback: any) {
     const createEntry = () => ({ message })
-
+    const chatroom = chatroomManager.getChatroomByName(chatroomName)
     handleEvent(chatroomName, createEntry)
-      .then(() => callback(null))
-      .catch(callback)
+      .then(() => callback("Ok"))
   }
 
   function handleGetChatrooms(_: any, callback: (arg0: null, arg1: { name: string; size: number }[]) => any) {
     return callback(null, chatroomManager.serializeChatrooms())
+  }
+
+  function handleCreateChatroom(chatroomName: string, user: Client, callback: any) {
+    const chatroom = chatroomManager.addChatroom(chatroomName, user)
+    return callback(null, chatroom);
   }
 
   function handleDisconnect() {
@@ -110,6 +119,7 @@ module.exports = function (client: Client, clientManager: ClientManagerType, cha
     handleLeave,
     handleMessage,
     handleGetChatrooms,
+    handleCreateChatroom,
     handleDisconnect
   }
 }

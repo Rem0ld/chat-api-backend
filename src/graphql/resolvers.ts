@@ -47,7 +47,7 @@ export const resolvers = {
         user,
       };
     },
-    // Log user if exist and password is correct
+    // Log user if exists and password is correct
     login: async (
       _parent: any,
       args: { username: string; password: string },
@@ -58,7 +58,7 @@ export const resolvers = {
           username: args.username,
         },
       });
-      if (!user) throw new Error(`No user found for this email: ${args.username}`);
+      if (!user) throw new Error(`No user found with this username: ${args.username}`);
 
       const passwordValid = await compare(args.password, user.password_hash);
       if (!passwordValid) throw new Error("Invalid password");

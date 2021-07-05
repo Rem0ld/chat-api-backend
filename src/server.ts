@@ -4,14 +4,18 @@ import {
   ChatroomManagerType,
   ClientManagerType,
 } from "./types";
-import { Context, createContext } from "./config/context";
+import { createContext } from "./config/context";
 const { ApolloServer, gql } = require("apollo-server-express");
 import { typeDefs } from "./graphql/schemas/Schema";
 import { permissions } from "./config/permissions";
 import { resolvers } from "./graphql/resolvers";
+import cors from "cors";
 
 const app = express();
 const port = process.env.PORT || 3000;
+app.use(cors({
+  origin: "http://127.0.0.1:3001",
+}))
 app.set("port", port);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -72,10 +76,13 @@ io.on("connection", function (socket: Socket) {
     handleLeave,
     handleMessage,
     handleGetChatrooms,
+    handleCreateChatroom,
     handleDisconnect,
   } = makeHandlers(socket, clientManager, chatroomManager);
 
-  console.log("connected : ", socket.id);
+  // console.log("connected : ", socket.id);
+
+  // console.log("Users", clientManager.getAllClients())
 
   socket.on("register", handleRegister);
 
@@ -87,10 +94,12 @@ io.on("connection", function (socket: Socket) {
 
   socket.on("chatrooms", handleGetChatrooms);
 
+  socket.on("create_chatrooms", handleCreateChatroom);
+
   // socket.on('availableUsers', handleGetAvailableUsers)
 
   socket.on("disconnect", function () {
-    console.log("socket disconnect...", socket.id);
+    // console.log("socket disconnect...", socket.id);
     handleDisconnect();
   });
 

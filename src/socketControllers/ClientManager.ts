@@ -1,4 +1,5 @@
-import { Client, ClientManagerType } from "./types";
+import { ClientManagerType, Client } from "../types";
+
 
 module.exports = function (): ClientManagerType {
   const clients = new Map<string, Client>();

@@ -3,7 +3,7 @@ import { Socket } from "socket.io";
 
 export interface Client {
   id: string;
-  name: string;
+  username: string;
   email: string;
   lastConnection: number;
 }
@@ -26,7 +26,7 @@ export interface ChatroomType {
 
 export interface ChatroomManagerType {
   removeClient: (arg0: Client) => void;
-  addChatroom: (arg0: string) => void;
+  addChatroom: (arg0: string, arg1: Client) => void;
   getChatroomByName: (arg0: string) => ChatroomType | undefined;
   getAllChatrooms: () => ChatroomType[];
   serializeChatrooms: () => { name: string, size: number }[];

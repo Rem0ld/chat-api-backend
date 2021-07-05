@@ -1,18 +1,20 @@
+import { ChatroomManagerType, ChatroomType, Client } from "../types";
 import Chatroom from "./chatroom";
-import { ChatroomManagerType, ChatroomType, Client } from "./types";
+
 
 
 
 module.exports = function (): ChatroomManagerType {
-  const chatrooms = new Map<string, any>();
+  const chatrooms = new Map<string, ChatroomType>();
 
   function removeClient(client: Client) {
     chatrooms.forEach(chatroom => chatroom.removeMember(client))
   }
 
-  function addChatroom(name: string) {
-    const chatroom = new Chatroom(name);
+  function addChatroom(name: string, user: Client) {
+    const chatroom = new Chatroom(name, user);
     chatrooms.set(name, chatroom);
+    return chatroom;
   }
 
   function getChatroomByName(name: string) {
@@ -24,7 +26,6 @@ module.exports = function (): ChatroomManagerType {
   }
 
   function serializeChatrooms() {
-    Array.from(chatrooms.values()).map(chatroom => chatroom.serialize())
     return Array.from(chatrooms.values()).map(chatroom => chatroom.serialize())
   }
 
