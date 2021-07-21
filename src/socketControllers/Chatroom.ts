@@ -1,12 +1,12 @@
 import { Socket } from "socket.io";
-import { User } from "../types";
+import { TEntry, User } from "../types";
 
 export default class Chatroom {
   name: string;
   owner: string;
   dateCreation: string;
   members: Map<string, { client: Socket, user: User }>;
-  chatHistory: string[];
+  chatHistory: TEntry[];
 
   constructor(name: string, client: Socket, user: User) {
     this.name = name;
@@ -17,13 +17,12 @@ export default class Chatroom {
     this.addMember(client, user);
   }
 
-  broadcastMessage({ message }: { message: string }) {
-    console.log("*******************\n", message)
-    this.members.forEach(member => member.client.emit("message", message))
+  broadcastMessage(entry: TEntry) {
+    this.members.forEach(member => member.client.emit("message", entry))
   }
 
-  addEntry({ message }: { message: string }) {
-    this.chatHistory.push(message)
+  addEntry(entry: TEntry) {
+    this.chatHistory.push(entry)
   }
 
   getChatHistory() {

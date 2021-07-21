@@ -1,5 +1,5 @@
 import { Socket } from "socket.io"
-import { IChatroomManager, IChatroom, IClientManager, SocketUser, User } from "../types"
+import { IChatroomManager, IChatroom, IClientManager, SocketUser, User, TEntry } from "../types"
 import Chatroom from "./chatroom"
 
 function makeHandleEvent(client: Socket, clientManager: IClientManager, chatroomManager: IChatroomManager) {
@@ -36,12 +36,8 @@ function makeHandleEvent(client: Socket, clientManager: IClientManager, chatroom
   async function handleEvent(chatroomName: string, createEntry: any) {
     const { chatroom, socket }: { chatroom: Chatroom, socket: SocketUser } = await ensureUserSelectedAndChatroomValid(chatroomName);
     const { client, user } = socket
-    const entry = { socket: { client, user }, ...createEntry() }
-    // console.log("handleEvent chatroom", chatroom)
-    // console.log("handleEvent user", socket)
-    // console.log("handleEvent entry", entry)
+    const entry: TEntry = { user, ...createEntry() }
     if (chatroom) {
-      console.log("adding entry and broadcasting")
       chatroom.addEntry(entry)
       chatroom.broadcastMessage(entry)
     }
@@ -90,7 +86,8 @@ module.exports = function (client: any, clientManager: IClientManager, chatroomM
         if (typeof chatroom !== "string")
           chatroom.removeMember(client.id)
 
-        callback(null)
+        // At the moment there is no reason to use this callback
+        // callback(null)
       })
     // .catch(callback)
   }

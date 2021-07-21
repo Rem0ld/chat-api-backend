@@ -17,6 +17,11 @@ export interface IClientManager {
   getAllClients: (arg0: Socket, arg1: User) => { client: Socket, user: User | undefined }[];
 }
 
+export type TEntry = {
+  user: User;
+  createEntry: () => { message: string, type: string }
+}
+
 export interface IChatroom {
   broadcastMessage: (arg0: string) => void;
   addEntry: (arg0: string) => void;
