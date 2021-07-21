@@ -1,8 +1,8 @@
 import express from "express";
 import { Socket } from "socket.io";
 import {
-  ChatroomManagerType,
-  ClientManagerType,
+  IChatroomManager,
+  IClientManager,
 } from "./types";
 import { createContext } from "./config/context";
 const { ApolloServer, gql } = require("apollo-server-express");
@@ -66,8 +66,8 @@ const ClientManager = require("./socketControllers/ClientManager");
 const ChatroomManager = require("./socketControllers/chatroomManager");
 const makeHandlers = require("./socketControllers/handlers");
 
-const clientManager: ClientManagerType = ClientManager();
-const chatroomManager: ChatroomManagerType = ChatroomManager();
+const clientManager: IClientManager = ClientManager();
+const chatroomManager: IChatroomManager = ChatroomManager();
 
 io.on("connection", function (socket: Socket) {
   const {

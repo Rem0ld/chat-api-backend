@@ -1,18 +1,21 @@
 import { Socket } from "socket.io";
-import { ChatroomManagerType, ChatroomType, Client } from "../types";
+import { IChatroomManager, User } from "../types";
 import Chatroom from "./chatroom";
 
 
 
 
-module.exports = function (): ChatroomManagerType {
+module.exports = function (): IChatroomManager {
   const chatrooms = new Map<string, Chatroom>();
 
-  function removeClient(client: Client) {
+  function removeClient(client: User) {
     chatrooms.forEach(chatroom => chatroom.removeMember(client))
   }
 
-  function addChatroom(name: string, client: Socket, user: Client) {
+  function addChatroom(name: string, client: Socket, user: User) {
+    if (getChatroomByName(name)) {
+      throw new Error(`${name} already exist!`);
+    }
     const chatroom = new Chatroom(name, client, user);
     chatrooms.set(name, chatroom);
     return chatroom;

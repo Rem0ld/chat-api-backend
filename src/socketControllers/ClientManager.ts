@@ -1,13 +1,13 @@
 import { Socket } from "socket.io";
-import { ClientManagerType, Client } from "../types";
+import { IClientManager, User } from "../types";
 
 
 
 
-module.exports = function (): ClientManagerType {
-  const clients = new Map<string, { client: Socket, user: Client | undefined }>();
+module.exports = function (): IClientManager {
+  const clients = new Map<string, { client: Socket, user: User | undefined }>();
 
-  function registerClient(client: Socket, user: Client) {
+  function registerClient(client: Socket, user: User) {
     clients.set(client.id, { client, user })
   }
 

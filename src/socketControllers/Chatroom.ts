@@ -1,14 +1,14 @@
 import { Socket } from "socket.io";
-import { ChatroomType, Client } from "../types";
+import { User } from "../types";
 
 export default class Chatroom {
   name: string;
   owner: string;
   dateCreation: string;
-  members: Map<string, { client: Socket, user: Client }>;
+  members: Map<string, { client: Socket, user: User }>;
   chatHistory: string[];
 
-  constructor(name: string, client: Socket, user: Client) {
+  constructor(name: string, client: Socket, user: User) {
     this.name = name;
     this.owner = user.id;
     this.members = new Map();
@@ -17,12 +17,12 @@ export default class Chatroom {
     this.addMember(client, user);
   }
 
-  broadcastMessage(message: string) {
-    console.log("this is the message\n *******************", message)
+  broadcastMessage({ message }: { message: string }) {
+    console.log("*******************\n", message)
     this.members.forEach(member => member.client.emit("message", message))
   }
 
-  addEntry(message: string) {
+  addEntry({ message }: { message: string }) {
     this.chatHistory.push(message)
   }
 
@@ -30,7 +30,7 @@ export default class Chatroom {
     return this.chatHistory.slice();
   }
 
-  addMember(client: Socket, user: Client) {
+  addMember(client: Socket, user: User) {
     this.members.set(client.id, { client, user })
   }
 
