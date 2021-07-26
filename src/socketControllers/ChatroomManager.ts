@@ -8,7 +8,7 @@ import Chatroom from "./chatroom";
 module.exports = function (): IChatroomManager {
   const chatrooms = new Map<string, Chatroom>();
 
-  function removeClient(client: User) {
+  function removeClient(client: Socket) {
     chatrooms.forEach(chatroom => chatroom.removeMember(client))
   }
 

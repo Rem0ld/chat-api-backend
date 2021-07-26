@@ -41,59 +41,83 @@ function makeHandleEvent(client: Socket, clientManager: IClientManager, chatroom
       chatroom.addEntry(entry)
       chatroom.broadcastMessage(entry)
     }
-
     return chatroom;
   }
-
   return handleEvent;
-
 }
+
 module.exports = function (client: any, clientManager: IClientManager, chatroomManager: IChatroomManager) {
   const handleEvent = makeHandleEvent(client, clientManager, chatroomManager);
 
-  function handleRegister(user: User, callback: any) {
-    const now = Date.now()
-    user.lastConnection = now;
+  function handleRegister({ user }: { user: User }, callback: any) {
+    user.lastConnection = Date.now();
     clientManager.registerClient(client, user)
     return callback(null, { socketId: client.id, user: user })
   }
 
   function handleJoin(chatroomName: string, user: User, callback: any) {
-    const createEntry = () => ({ message: `${user.username} joined ${chatroomName}`, type: "event" })
+    // const createEntry = () => ({ message: `${user.username} joined ${chatroomName}`, type: "event", timestamp: Date.now() })
 
-    handleEvent(chatroomName, createEntry)
-      .then((chatroom) => {
-        console.log("handle join", chatroom)
-        if (chatroom) {
+    // handleEvent(chatroomName, createEntry)
+    //   .then((chatroom) => {
+    //     console.log("handle join", chatroom)
+    //     if (chatroom) {
 
-          const members = Array.from(chatroom.members.values())
-          const member = members.some(element => element.client.id === client.id)
+    //       const members = Array.from(chatroom.members.values())
+    //       const member = members.some(element => element.client.id === client.id)
 
-          if (!member) {
-            chatroom.addMember(client, user)
-          }
-          callback(null, chatroom.getChatHistory())
-        }
-      })
-      .catch(error => console.error(error))
+    //       if (!member) {
+    //         chatroom.addMember(client, user)
+    //       }
+    //       callback(null, chatroom.getChatHistory())
+    //     }
+    //   })
+    //   .catch(error => console.error(error))
+    const chatroom = chatroomManager.getChatroomByName(chatroomName);
+    if (chatroom) {
+
+      const members = Array.from(chatroom.members.values())
+      const member = members.some(element => element.client.id === client.id)
+
+      if (!member) {
+        chatroom.addMember(client, user)
+      }
+
+      chatroom.broadcastMembers();
+
+      const data = {
+        chat: chatroom.getChatHistory(),
+        listUserConnected: chatroom.getMembers()
+      }
+      callback(null, data)
+    } else {
+      callback(new Error("chatroom doesn't exist"), null)
+    }
   }
 
   function handleLeave(chatroomName: string, user: User, callback: any) {
-    const createEntry = () => ({ message: `${user.username} left ${chatroomName}`, type: "event" })
+    // const createEntry = () => ({ message: `${user.username} left ${chatroomName}`, type: "event", timestamp: Date.now() })
 
-    handleEvent(chatroomName, createEntry)
-      .then(function (chatroom) {
-        if (typeof chatroom !== "string")
-          chatroom.removeMember(client.id)
+    // handleEvent(chatroomName, createEntry)
+    //   .then(function (chatroom) {
+    //     if (chatroom)
+    //       chatroom.removeMember(client.id)
 
-        // At the moment there is no reason to use this callback
-        // callback(null)
-      })
+    //     // At the moment there is no reason to use this callback
+    //     // callback(null)
+    //   })
     // .catch(callback)
+
+    const chatroom = chatroomManager.getChatroomByName(chatroomName);
+    if (chatroom) {
+      chatroom.removeMember(client);
+      chatroom.broadcastMembers();
+      // callback()
+    }
   }
 
   function handleMessage({ chatroomName, message }: { chatroomName: string, message: string }, callback: any) {
-    const createEntry = () => ({ message, type: "message" })
+    const createEntry = () => ({ message, type: "message", timestamp: Date.now() })
     const chatroom = chatroomManager.getChatroomByName(chatroomName)
     handleEvent(chatroom?.name as string, createEntry)
       .then(() => callback())

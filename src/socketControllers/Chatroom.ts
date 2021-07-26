@@ -21,6 +21,11 @@ export default class Chatroom {
     this.members.forEach(member => member.client.emit("message", entry))
   }
 
+  broadcastMembers() {
+    const members = this.getMembers();
+    this.members.forEach(member => member.client.emit("event-connection", members))
+  }
+
   addEntry(entry: TEntry) {
     this.chatHistory.push(entry)
   }
@@ -33,8 +38,17 @@ export default class Chatroom {
     this.members.set(client.id, { client, user })
   }
 
-  removeMember(member: any) {
+  removeMember(member: Socket) {
     this.members.delete(member.id)
+  }
+
+  getMembers() {
+    const members = this.members.values();
+    const returnValue = [];
+    for (let member of members) {
+      returnValue.push(member.user)
+    }
+    return returnValue;
   }
 
   serialize() {

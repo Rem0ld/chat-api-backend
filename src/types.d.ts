@@ -24,15 +24,17 @@ export type TEntry = {
 
 export interface IChatroom {
   broadcastMessage: (arg0: string) => void;
+  broadcastMembers: () => void;
   addEntry: (arg0: string) => void;
   getChatHistory: () => string[];
   addMember: (arg0: User) => void;
   removeMember: (arg: User) => void;
+  getMembers: () => User[];
   serialize: () => { name: string, size: number }
 }
 
 export interface IChatroomManager {
-  removeClient: (arg0: User) => void;
+  removeClient: (arg0: Socket) => void;
   addChatroom: (arg0: string, arg1: Socket, arg2: User) => Chatroom | undefined;
   getChatroomByName: (arg0: string) => Chatroom | undefined;
   getAllChatrooms: () => Chatroom[];
