@@ -18,6 +18,10 @@ module.exports = function (): IChatroomManager {
     return chatroom;
   }
 
+  function deleteChatroom(name: string, client: Socket, user: User): boolean {
+    return chatrooms.delete(name)
+  }
+
   function getChatroomByName(name: string) {
     return chatrooms.get(name);
   }
@@ -33,6 +37,7 @@ module.exports = function (): IChatroomManager {
   return {
     removeClient,
     addChatroom,
+    deleteChatroom,
     getChatroomByName,
     getAllChatrooms,
     serializeChatrooms

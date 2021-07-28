@@ -36,6 +36,7 @@ export interface IChatroom {
 export interface IChatroomManager {
   removeClient: (arg0: Socket) => void;
   addChatroom: (arg0: string, arg1: Socket, arg2: User) => Chatroom | undefined;
+  deleteChatroom: (arg0: string, arg1: Socket, arg2: User) => boolean;
   getChatroomByName: (arg0: string) => Chatroom | undefined;
   getAllChatrooms: () => Chatroom[];
   serializeChatrooms: () => TSerializedChatroom[];

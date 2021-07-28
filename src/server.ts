@@ -59,6 +59,7 @@ io.on("connection", function (socket: Socket) {
     handleMessage,
     handleGetChatrooms,
     handleCreateChatroom,
+    handleDeleteChatroom,
     handleDisconnect,
   } = makeHandlers(socket, clientManager, chatroomManager);
 
@@ -79,10 +80,9 @@ io.on("connection", function (socket: Socket) {
 
   socket.on("create_chatrooms", handleCreateChatroom);
 
-  // socket.on('availableUsers', handleGetAvailableUsers)
+  socket.on("delete_chatrooms", handleDeleteChatroom);
 
   socket.on("disconnect", function () {
-    // console.log("socket disconnect...", socket.id);
     handleDisconnect();
   });
 

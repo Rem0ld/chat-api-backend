@@ -131,10 +131,17 @@ module.exports = function (client: any, clientManager: IClientManager, chatroomM
     if (chatroomManager.getChatroomByName(chatroomName)) {
       return callback(`${chatroomName} already exist!`, {});
     }
-    console.log(user)
     let chatroom: Chatroom = chatroomManager.addChatroom(chatroomName, client, user) as Chatroom;
-    console.log(chatroom.serialize());
     return callback(null, chatroomManager.serializeChatrooms());
+  }
+
+  function handleDeleteChatroom(chatroomName: string, { user }: { user: User }, callback: any) {
+    const result = chatroomManager.deleteChatroom(chatroomName, client, user)
+    if (!result) {
+      return callback(`${chatroomName} doesn't exist`, {})
+    } else {
+      return callback(null, chatroomManager.serializeChatrooms());
+    }
   }
 
   function handleDisconnect() {
@@ -151,6 +158,7 @@ module.exports = function (client: any, clientManager: IClientManager, chatroomM
     handleMessage,
     handleGetChatrooms,
     handleCreateChatroom,
+    handleDeleteChatroom,
     handleDisconnect
   }
 }
