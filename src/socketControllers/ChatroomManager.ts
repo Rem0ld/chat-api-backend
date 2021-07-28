@@ -12,10 +12,7 @@ module.exports = function (): IChatroomManager {
     chatrooms.forEach(chatroom => chatroom.removeMember(client))
   }
 
-  function addChatroom(name: string, client: Socket, user: User) {
-    if (getChatroomByName(name)) {
-      throw new Error(`${name} already exist!`);
-    }
+  function addChatroom(name: string, client: Socket, user: User): Chatroom {
     const chatroom = new Chatroom(name, client, user);
     chatrooms.set(name, chatroom);
     return chatroom;

@@ -1,5 +1,5 @@
 import { Socket } from "socket.io"
-import { IChatroomManager, IChatroom, IClientManager, SocketUser, User, TEntry } from "../types"
+import { IChatroomManager, IChatroom, IClientManager, SocketUser, User, TEntry, TSerializedChatroom } from "../types"
 import Chatroom from "./chatroom"
 
 function makeHandleEvent(client: Socket, clientManager: IClientManager, chatroomManager: IChatroomManager) {
@@ -123,18 +123,18 @@ module.exports = function (client: any, clientManager: IClientManager, chatroomM
       .then(() => callback())
   }
 
-  function handleGetChatrooms(_: any, callback: (arg0: null, arg1: { name: string; size: number }[]) => any) {
+  function handleGetChatrooms(_: any, callback: (arg0: Error | string | null, arg1: { name: string; size: number }[]) => any) {
     return callback(null, chatroomManager.serializeChatrooms())
   }
 
-  function handleCreateChatroom(chatroomName: string, user: User, callback: any) {
-    let chatroom: Chatroom | undefined;
-    try {
-      chatroom = chatroomManager.addChatroom(chatroomName, client, user)
-    } catch (error) {
-      return callback(error.message, undefined);
+  function handleCreateChatroom(chatroomName: string, { user }: { user: User }, callback: any) {
+    if (chatroomManager.getChatroomByName(chatroomName)) {
+      return callback(`${chatroomName} already exist!`, {});
     }
-    return callback(null, chatroom);
+    console.log(user)
+    let chatroom: Chatroom = chatroomManager.addChatroom(chatroomName, client, user) as Chatroom;
+    console.log(chatroom.serialize());
+    return callback(null, chatroomManager.serializeChatrooms());
   }
 
   function handleDisconnect() {

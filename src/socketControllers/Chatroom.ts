@@ -3,14 +3,14 @@ import { TEntry, User } from "../types";
 
 export default class Chatroom {
   name: string;
-  owner: string;
+  owner: User;
   dateCreation: string;
   members: Map<string, { client: Socket, user: User }>;
   chatHistory: TEntry[];
 
   constructor(name: string, client: Socket, user: User) {
     this.name = name;
-    this.owner = user.id;
+    this.owner = user;
     this.members = new Map();
     this.chatHistory = [];
     this.dateCreation = new Date().toISOString().split('T')[0];;
@@ -54,7 +54,7 @@ export default class Chatroom {
   serialize() {
     return {
       name: this.name,
-      owner: this.owner,
+      owner: this.owner.username,
       size: this.members.size
     };
   }
