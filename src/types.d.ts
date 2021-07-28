@@ -30,7 +30,7 @@ export interface IChatroom {
   addMember: (arg0: User) => void;
   removeMember: (arg: User) => void;
   getMembers: () => User[];
-  serialize: () => { name: string, size: number }
+  serialize: () => TSerializedChatroom;
 }
 
 export interface IChatroomManager {
@@ -38,5 +38,11 @@ export interface IChatroomManager {
   addChatroom: (arg0: string, arg1: Socket, arg2: User) => Chatroom | undefined;
   getChatroomByName: (arg0: string) => Chatroom | undefined;
   getAllChatrooms: () => Chatroom[];
-  serializeChatrooms: () => { name: string, size: number }[];
+  serializeChatrooms: () => TSerializedChatroom[];
+}
+
+export type TSerializedChatroom = {
+  name: string;
+  owner: string;
+  size: number;
 }
