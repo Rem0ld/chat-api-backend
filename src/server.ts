@@ -30,24 +30,6 @@ const server = new ApolloServer({
 server.applyMiddleware({ app });
 
 
-// const client: Client = {
-//   id: "1192387",
-//   name: "Pierre",
-//   email: "p.lovergne@hotmail.fr",
-//   lastConnection: Date.now()
-// }
-// clientManager.addClient(client)
-// console.log(clientManager.getAllClients())
-
-// chatroomManager.addChatroom("salon1")
-// // console.log(chatroomManager.serializeChatrooms());
-// const salon: ChatroomType = chatroomManager.getChatroomByName("salon1");
-// salon.addMember(client)
-// salon.addEntry("test")
-// handleMessage({ chatroomName: "salon1", message: "je suis message" })
-// salon.getChatHistory();
-// // console.log(salon.getChatHistory())
-
 const http = app.listen(port, function () {
   console.log(`Listening on localhost:${port}`);
   console.log(`GraphQL API server at http://localhost:${port}/graphql`);
